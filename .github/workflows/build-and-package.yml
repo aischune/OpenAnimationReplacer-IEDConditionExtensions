@@ -1,0 +1,72 @@
+name: Build and Package Mod
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup xmake
+        uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: latest
+
+      - name: Build (Windows x64, releasedbg)
+        shell: pwsh
+        run: |
+          xmake f -p windows -a x64 -m releasedbg
+          xmake build
+
+      - name: Package mod archive
+        id: package
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $modName = "OpenAnimationReplacer-IEDConditionExtensions"
+          $artifactRoot = Join-Path $PWD "dist"
+          $modRoot = Join-Path $artifactRoot "$modName"
+          $pluginsDir = Join-Path $modRoot "Data/SKSE/Plugins"
+          New-Item -ItemType Directory -Path $pluginsDir -Force | Out-Null
+
+          $dll = Get-ChildItem -Path (Join-Path $PWD "build") -Filter "$modName.dll" -Recurse | Select-Object -First 1
+          if (-not $dll) {
+            throw "Could not find built DLL under build/"
+          }
+
+          Copy-Item -Path $dll.FullName -Destination $pluginsDir -Force
+
+          $pdb = Get-ChildItem -Path (Join-Path $PWD "build") -Filter "$modName.pdb" -Recurse | Select-Object -First 1
+          if ($pdb) {
+            Copy-Item -Path $pdb.FullName -Destination $pluginsDir -Force
+          }
+
+          $zipPath = Join-Path $artifactRoot "$modName-${{ github.ref_name }}.zip"
+          Compress-Archive -Path (Join-Path $modRoot "*") -DestinationPath $zipPath -Force
+          "zip_path=$zipPath" >> $env:GITHUB_OUTPUT
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenAnimationReplacer-IEDConditionExtensions-${{ github.ref_name }}
+          path: ${{ steps.package.outputs.zip_path }}
+          if-no-files-found: error
+
+      - name: Upload release asset (tags only)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.package.outputs.zip_path }}

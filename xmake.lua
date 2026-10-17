@@ -3,7 +3,7 @@ set_xmakever("2.7.8")
 
 -- set project
 set_project("OpenAnimationReplacer-IEDConditionExtensions")
-set_version("1.0.1")
+set_version("1.0.2")
 set_license("gplv3")
 set_languages("c++20")
 set_optimize("faster")
@@ -24,8 +24,15 @@ add_rules("plugin.vsxmake.autoupdate")
 -- set policies
 set_policy("package.requires_lock", true)
 
+-- options
+option("skyrim_vr")
+    set_default(false)
+    set_showmenu(true)
+    set_description("Build for Skyrim VR runtime")
+option_end()
+
 -- require packages
-add_requires("commonlibsse-ng", { configs = { skyrim_vr = true } })
+add_requires("commonlibsse-ng", { configs = { skyrim_vr = has_config("skyrim_vr") } })
 
 -- targets
 target("OpenAnimationReplacer-IEDConditionExtensions")
