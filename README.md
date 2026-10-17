@@ -2,6 +2,8 @@
 
 This is a SKSE64 plugin that lets OAR read data from IED and SDS via conditions.
 
+Current release target runtime: **Skyrim SE/AE 1.7.104**.
+
 ### Requirements
 * [XMake](https://xmake.io) [2.7.8+]
 * C++20 Compiler (MSVC, Clang?)
@@ -15,6 +17,12 @@ cd OpenAnimationReplacer-IEDConditionExtensions
 ### Build
 To build the project, run the following command:
 ```bat
+xmake build
+```
+
+To build for Skyrim VR instead:
+```bat
+xmake f --skyrim_vr=y
 xmake build
 ```
 
@@ -43,3 +51,6 @@ If you want to upgrade the project's dependencies, run the following commands:
 xmake repo --update
 xmake require --upgrade
 ```
+
+## Release Notes
+- **1.0.2**: Added explicit Skyrim SE/AE 1.7.104 target runtime support in build configuration, with optional VR build toggle.
