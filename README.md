@@ -54,3 +54,14 @@ xmake require --upgrade
 
 ## Release Notes
 - **1.0.2**: Added explicit Skyrim SE/AE 1.7.104 target runtime support in build configuration, with optional VR build toggle.
+
+## GitHub Actions Build & Packaging
+This repository includes a workflow at:
+
+- `.github/workflows/build-and-package.yml`
+
+What it does:
+- Builds the plugin on `windows-latest` with xmake (`windows/x64/releasedbg`)
+- Packages a mod-ready archive with `Data/SKSE/Plugins/*.dll` (and `.pdb` when available)
+- Uploads the archive as a downloadable Actions artifact
+- On `v*` tags, also uploads the archive to a GitHub Release
